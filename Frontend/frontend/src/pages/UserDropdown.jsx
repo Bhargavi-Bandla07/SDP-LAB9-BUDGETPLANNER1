@@ -6,7 +6,6 @@ export default function UserDropdown({ user, setUser }) {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
-  // Click-outside handler
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -27,17 +26,13 @@ export default function UserDropdown({ user, setUser }) {
   const displayName = user?.name || user?.email || "User";
 
   return (
-    <div ref={dropdownRef} className="user-dropdown">
-      <span
-        onClick={() => setOpen((o) => !o)}
-        style={{ cursor: "pointer", userSelect: "none" }}
-      >
+    <div ref={dropdownRef} className="user-dropdown" style={{ display: "inline-block" }}>
+      <span onClick={() => setOpen((o) => !o)} style={{ cursor: "pointer" }}>
         Hi, {displayName} ▼
       </span>
-
       {open && (
-        <div className="dropdown-menu">
-          <button onClick={() => navigate("/update-profile")}>
+        <div className="dropdown-menu" style={{ position: "absolute", background: "#fff", border: "1px solid #ccc", padding: "8px" }}>
+          <button onClick={() => { setOpen(false); navigate("/update-profile"); }}>
             Update Profile
           </button>
           <button onClick={handleLogout}>Logout</button>

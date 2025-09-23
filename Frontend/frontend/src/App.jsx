@@ -13,7 +13,7 @@ import UpdateProfile from "./pages/UpdateProfile";
 import "./App.css";
 
 export default function App() {
-  // <-- LIFT USER STATE HERE
+  // single source of truth for user
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -30,24 +30,32 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
 
-            {/* Protected routes - only accessible after signin */}
+            {/* Protected routes */}
             <Route path="/expense" element={
-              <PrivateRoute><Expense /></PrivateRoute>
+              <PrivateRoute user={user}>
+                <Expense />
+              </PrivateRoute>
             } />
             <Route path="/income" element={
-              <PrivateRoute><Income /></PrivateRoute>
+              <PrivateRoute user={user}>
+                <Income />
+              </PrivateRoute>
             } />
             <Route path="/savings" element={
-              <PrivateRoute><Savings /></PrivateRoute>
+              <PrivateRoute user={user}>
+                <Savings />
+              </PrivateRoute>
             } />
             <Route path="/alerts" element={
-              <PrivateRoute><Alerts /></PrivateRoute>
+              <PrivateRoute user={user}>
+                <Alerts />
+              </PrivateRoute>
             } />
 
             {/* Update profile route */}
             <Route path="/update-profile" element={<UpdateProfile setUser={setUser} />} />
 
-            {/* Auth pages */}
+            {/* Auth pages — pass setUser so signin/signup can update the app */}
             <Route path="/signup" element={<Signup setUser={setUser} />} />
             <Route path="/signin" element={<Signin setUser={setUser} />} />
           </Routes>

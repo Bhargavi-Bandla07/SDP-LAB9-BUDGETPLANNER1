@@ -1,13 +1,15 @@
-// src/PrivateRoute.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-export default function PrivateRoute({ children }) {
-  const userJson = localStorage.getItem("user");
-  const user = userJson ? JSON.parse(userJson) : null;
-  if (!user) {
-    // not signed in -> redirect to signin
+/**
+ * PrivateRoute
+ * - Accepts optional user prop (from App state).
+ * - Falls back to localStorage if user prop is not yet populated.
+ */
+export default function PrivateRoute({ user, children }) {
+  const currentUser = user || (localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null);
+  if (!currentUser) {
     return <Navigate to="/signin" replace />;
   }
-  return children; // render protected page
+  return children;
 }
