@@ -9,11 +9,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173") // adjust frontend origin if needed
+@CrossOrigin(origins = "*") // adjust frontend origin if needed
 public class AuthController {
 
     private final AuthService authService;
-    public AuthController(AuthService authService) { this.authService = authService; }
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Map<String, String> body) {
@@ -26,8 +29,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of(
                     "id", user.getId(),
                     "name", user.getName(),
-                    "email", user.getEmail()
-            ));
+                    "email", user.getEmail()));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
@@ -42,8 +44,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of(
                     "id", user.getId(),
                     "name", user.getName(),
-                    "email", user.getEmail()
-            ));
+                    "email", user.getEmail()));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(401).body(Map.of("error", ex.getMessage()));
         }

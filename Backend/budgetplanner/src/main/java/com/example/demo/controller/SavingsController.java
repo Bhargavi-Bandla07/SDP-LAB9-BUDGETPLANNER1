@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/savings")
-@CrossOrigin(origins = "http://localhost:5173") // allow frontend React app
+@CrossOrigin(origins = "*") // allow frontend React app
 public class SavingsController {
 
     private final SavingsService savingsService;

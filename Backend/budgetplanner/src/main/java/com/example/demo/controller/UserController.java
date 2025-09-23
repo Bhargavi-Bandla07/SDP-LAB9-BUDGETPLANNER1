@@ -1,4 +1,5 @@
 package com.example.demo.controller;
+
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,16 +27,18 @@ public class UserController {
     @GetMapping("/{id}")
     public User getUser(@PathVariable Long id) {
         return userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody Map<String, String> updates) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (updates.containsKey("name")) user.setName(updates.get("name"));
-        if (updates.containsKey("email")) user.setEmail(updates.get("email"));
+        if (updates.containsKey("name"))
+            user.setName(updates.get("name"));
+        if (updates.containsKey("email"))
+            user.setEmail(updates.get("email"));
         if (updates.containsKey("password") && !updates.get("password").isEmpty()) {
             String hashed = new BCryptPasswordEncoder().encode(updates.get("password"));
             user.setPasswordHash(hashed);
