@@ -6,7 +6,7 @@ services:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: 32939
-      MYSQL_DATABASE: studentdb
+      MYSQL_DATABASE: budgetplannerdb
     ports:
       - "3307:3306"
     volumes:
