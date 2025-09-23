@@ -20,32 +20,53 @@ export default function Signin({ setUser }) {
         body: JSON.stringify({ email, password }),
       });
 
+      // read raw JSON
       const data = await res.json();
 
+      // LOG the backend response so you can inspect it (open DevTools Console)
+      console.log("SIGNIN RESPONSE:", data, "HTTP_STATUS:", res.status);
+
       if (!res.ok) {
-        setMsg(data.error || "Signin failed — check credentials");
+        setMsg(data.error || data.message || "Signin failed — check credentials");
         return;
       }
 
-      // backend should return { token: "...", user: { id, name, email } }
-      const token = data.token ?? data.accessToken ?? data.jwt;
-      const user = data.user ?? data;
+      // Try multiple common shapes for token & user
+      const token =
+        data.token ||
+        data.accessToken ||
+        data.jwt ||
+        (data.data && (data.data.token || data.data.accessToken || data.data.jwt));
 
-      if (!token) {
-        console.warn("No token in signin response:", data);
-      } else {
+      // user may be returned as data.user or as the whole response
+      const user =
+        data.user ||
+        data.userInfo ||
+        data.data ||
+        (data.id && { id: data.id, name: data.name, email: data.email }) ||
+        data;
+
+      // Save token if present
+      if (token) {
         localStorage.setItem("token", token);
+      } else {
+        console.warn("No token found in signin response");
       }
 
-      if (user) {
+      // Save user if present (stringify)
+      if (user && Object.keys(user).length > 0) {
         localStorage.setItem("user", JSON.stringify(user));
-        setUser(user);
+        // update app state
+        if (typeof setUser === "function") setUser(user);
+      } else {
+        console.warn("No user object found in signin response");
       }
 
-      // After storing token + user, navigate to protected route
+      // Ensure that we saved either token or user before navigating
+      // navigate to protected page
       navigate("/expense");
     } catch (err) {
-      console.error("Signin error:", err);
+      console.error("Signin fetch error:", err);
       setMsg("Network error");
     }
   };
