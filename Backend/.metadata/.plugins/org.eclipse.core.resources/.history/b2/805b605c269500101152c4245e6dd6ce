@@ -1,0 +1,18 @@
+package com.example.demo.entity;
+
+package com.example.budget.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+public class Savings {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Double amount;
+    private LocalDateTime createdAt = LocalDateTime.now();
+}

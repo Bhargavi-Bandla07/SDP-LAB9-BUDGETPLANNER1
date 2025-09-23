@@ -1,0 +1,66 @@
+package com.example.demo.service;
+
+import com.example.demo.entity.Alert;
+import com.example.demo.entity.Expense;
+import com.example.demo.repository.AlertRepository;
+import com.example.demo.repository.ExpenseRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class AlertServiceImpl implements AlertService {
+
+    private final AlertRepository alertRepository;
+    private final ExpenseRepository expenseRepository;
+
+    private final double DEFAULT_MONTHLY_LIMIT = 50000;
+
+    public AlertServiceImpl(AlertRepository alertRepository, ExpenseRepository expenseRepository) {
+        this.alertRepository = alertRepository;
+        this.expenseRepository = expenseRepository;
+    }
+
+    @Override
+    public List<Alert> getAllAlerts() {
+        return alertRepository.findAll();
+    }
+
+    @Override
+    public void evaluateAlerts(Double limit) {
+        double monthlyLimit = (limit != null) ? limit : DEFAULT_MONTHLY_LIMIT;
+
+        LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+
+        List<Expense> monthlyExpenses = expenseRepository.findByDateBetween(startOfMonth, endOfMonth);
+        double total = monthlyExpenses.stream().mapToDouble(e -> e.getAmount() != null ? e.getAmount() : 0).sum();
+
+        if (total > monthlyLimit) {
+            createAlert("Monthly limit exceeded",
+                    "Your monthly expenses ₹" + total + " exceeded your limit of ₹" + monthlyLimit,
+                    "CRITICAL");
+        } else if (total >= monthlyLimit * 0.9) {
+            createAlert("Approaching monthly limit",
+                    "You've spent ₹" + total + " (≥90% of ₹" + monthlyLimit + ")",
+                    "WARNING");
+        }
+    }
+
+    private void createAlert(String title, String message, String severity) {
+        Alert alert = new Alert();
+        alert.setTitle(title);
+        alert.setMessage(message);
+        alert.setSeverity(severity);
+        alert.setCreatedAt(LocalDateTime.now());
+        alertRepository.save(alert);
+    }
+
+    @Override
+    public void clearAllAlerts() {
+        alertRepository.deleteAll();
+    }
+}

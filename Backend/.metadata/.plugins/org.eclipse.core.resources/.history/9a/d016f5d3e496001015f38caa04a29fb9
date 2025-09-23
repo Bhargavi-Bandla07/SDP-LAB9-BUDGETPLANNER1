@@ -1,0 +1,26 @@
+package com.example.demo.controller;
+
+import com.example.demo.entity.Alert;
+import com.example.demo.service.AlertService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/alerts")
+@CrossOrigin(origins = "http://localhost:5173")
+public class AlertController {
+
+    private final AlertService alertService;
+
+    public AlertController(AlertService alertService) {
+        this.alertService = alertService;
+    }
+
+    // Get all alerts with optional dynamic limit
+    @GetMapping
+    public List<Alert> getAlerts(@RequestParam(required = false) Double limit) {
+        alertService.evaluateAlerts(limit);
+        return alertService.getAllAlerts();
+    }
+}

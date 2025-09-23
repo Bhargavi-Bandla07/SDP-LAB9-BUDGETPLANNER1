@@ -1,0 +1,29 @@
+
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "incomes")
+public class Income {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String source;
+    private double amount;
+
+    public Income() {}
+
+    public Income(String source, double amount) {
+        this.source = source;
+        this.amount = amount;
+    }
+
+    public Long getId() { return id; }
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
+    public double getAmount() { return amount; }
+    public void setAmount(double amount) { this.amount = amount; }
+}

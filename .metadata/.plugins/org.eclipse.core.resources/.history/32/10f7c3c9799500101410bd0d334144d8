@@ -1,0 +1,35 @@
+package com.example.demo.service;
+
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+    private final UserRepository userRepo;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public AuthService(UserRepository userRepo, BCryptPasswordEncoder passwordEncoder) {
+        this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public User signUp(String name, String email, String rawPassword) {
+        if (userRepo.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+        String hash = passwordEncoder.encode(rawPassword);
+        User user = new User(name, email, hash);
+        return userRepo.save(user);
+    }
+
+    public User signIn(String email, String rawPassword) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+        if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+        return user;
+    }
+}

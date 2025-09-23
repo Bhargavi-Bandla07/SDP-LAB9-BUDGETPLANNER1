@@ -1,0 +1,24 @@
+.alerts-container table tr:hover {
+  background-color: #f1f7ff;
+}
+
+/* 🔴 Highlight full row when alert is HIGH severity */
+.alert-high td {
+  background-color: #ffe5e5 !important; /* light red */
+  color: #b30000 !important;           /* dark red text */
+  font-weight: bold;
+}
+
+.alert-high:hover td {
+  background-color: #ffd6d6 !important;
+}
+
+/* Severity badges (optional) */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: rgb(237, 24, 24);
+}

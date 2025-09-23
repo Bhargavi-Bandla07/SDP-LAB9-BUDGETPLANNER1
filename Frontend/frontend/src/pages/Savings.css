@@ -1,0 +1,98 @@
+.savings-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.savings-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.goal-input input,
+.savings-form input {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.savings-form button {
+  padding: 10px 15px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.savings-form button:hover {
+  background-color: #1e8449;
+}
+
+.progress-bar {
+  height: 25px;
+  background: #eee;
+  border-radius: 12px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #27ae60, #1e8449);
+  transition: width 0.5s ease-in-out;
+}
+
+.savings-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.savings-table th,
+.savings-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.savings-table th {
+  background: #f4f4f4;
+}
+
+.edit-btn,
+.delete-btn {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background: #2980b9;
+  color: white;
+}
+
+.delete-btn {
+  background: #c0392b;
+  color: white;
+}
+
+.savings-summary {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.goal-reached {
+  margin-top: 15px;
+  font-weight: bold;
+  color: green;
+  font-size: 18px;
+}

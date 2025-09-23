@@ -1,0 +1,76 @@
+.income-container {
+  max-width: 800px;
+  margin: 30px auto;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.income-title {
+  text-align: center;
+  color: #6a1b9a;
+  margin-bottom: 20px;
+}
+
+.income-form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.income-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.income-form button {
+  padding: 10px 15px;
+  background: #9c27b0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.income-form button:hover {
+  background: #7b1fa2;
+}
+
+.income-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.income-table th,
+.income-table td {
+  border: 1px solid #eee;
+  padding: 12px;
+  text-align: center;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+.income-summary {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1e3a8a;
+}

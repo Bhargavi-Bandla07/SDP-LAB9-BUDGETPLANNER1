@@ -1,0 +1,43 @@
+package com.example.demo.service;
+
+import com.example.demo.entity.Savings;
+import com.example.demo.repository.SavingsRepository;
+import com.example.demo.service.SavingsService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class SavingsServiceImpl implements SavingsService {
+
+    private final SavingsRepository savingsRepository;
+
+    public SavingsServiceImpl(SavingsRepository savingsRepository) {
+        this.savingsRepository = savingsRepository;
+    }
+
+    @Override
+    public List<Savings> getAllSavings() {
+        return savingsRepository.findAll();
+    }
+
+    @Override
+    public Savings addSavings(Savings savings) {
+        return savingsRepository.save(savings);
+    }
+
+    @Override
+    public Savings updateSavings(Long id, Savings updatedSavings) {
+        return savingsRepository.findById(id).map(s -> {
+            s.setGoalName(updatedSavings.getGoalName());
+            s.setTargetAmount(updatedSavings.getTargetAmount());
+            s.setSavedAmount(updatedSavings.getSavedAmount());
+            return savingsRepository.save(s);
+        }).orElseThrow(() -> new RuntimeException("Savings not found with id: " + id));
+    }
+
+    @Override
+    public void deleteSavings(Long id) {
+        savingsRepository.deleteById(id);
+    }
+}

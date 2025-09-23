@@ -1,0 +1,91 @@
+package com.example.demo.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity // Marks this class as a JPA entity
+@Table(name = "expenses") // Maps the entity to a database table named 'expenses'
+public class Expense {
+
+    @Id // Specifies the primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increments the ID
+    private Long id;
+
+    // Corresponds to 'Expense Name'
+    private String name;
+
+    // Corresponds to 'Amount'
+    private Double amount;
+
+    // Corresponds to 'Category'
+    private String category;
+
+    // Corresponds to 'Date'
+    private LocalDate date;
+
+    // --- Constructors ---
+
+    public Expense() {
+    }
+
+    public Expense(String name, Double amount, String category, LocalDate date) {
+        this.name = name;
+        this.amount = amount;
+        this.category = category;
+        this.date = date;
+    }
+
+    // --- Getters and Setters ---
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    // You might also want a toString() for logging/debugging
+    @Override
+    public String toString() {
+        return "Expense{" +
+               "id=" + id +
+               ", name='" + name + '\'' +
+               ", amount=" + amount +
+               ", category='" + category + '\'' +
+               ", date=" + date +
+               '}';
+    }
+}

@@ -1,0 +1,39 @@
+package com.example.demo.controller;
+
+import com.example.demo.entity.Savings;
+import com.example.demo.service.SavingsService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/savings")
+@CrossOrigin(origins = "http://localhost:5173")
+public class SavingController {
+
+    private final SavingsService savingsService = null;
+
+    public void SavingsController(SavingsService savingsService) {
+        this.savingsService = savingsService;  // ✅ fixed constructor
+    }
+
+    @GetMapping
+    public List<Savings> getAllSavings() {
+        return savingsService.getAllSavings();
+    }
+
+    @PostMapping
+    public Savings addSavings(@RequestBody Savings savings) {
+        return savingsService.addSavings(savings);
+    }
+
+    @PutMapping("/{id}")
+    public Savings updateSavings(@PathVariable Long id, @RequestBody Savings savings) {
+        return savingsService.updateSavings(id, savings);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteSavings(@PathVariable Long id) {
+        savingsService.deleteSavings(id);
+    }
+}
