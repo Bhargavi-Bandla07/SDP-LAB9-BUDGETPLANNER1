@@ -10,9 +10,18 @@ public class Savings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "goal_name")
     private String goalName;
+
+    @Column(name = "target_amount")
     private double targetAmount;
+
+    @Column(name = "saved_amount")
     private double savedAmount;
+
+    // ✅ Map the existing DB column `current_amount`
+    @Column(name = "current_amount", nullable = false)
+    private double currentAmount = 0.0;
 
     public Savings() {
     }
@@ -21,9 +30,10 @@ public class Savings {
         this.goalName = goalName;
         this.targetAmount = targetAmount;
         this.savedAmount = savedAmount;
+        this.currentAmount = savedAmount; // initialize with savedAmount or keep 0
     }
 
-    // Getters & Setters
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -52,8 +62,17 @@ public class Savings {
         this.savedAmount = savedAmount;
     }
 
-    // ✅ Optional: helper method to increment savedAmount
+    public double getCurrentAmount() {
+        return currentAmount;
+    }
+
+    public void setCurrentAmount(double currentAmount) {
+        this.currentAmount = currentAmount;
+    }
+
+    // helper to increment saved + current
     public void addToSavedAmount(double amount) {
         this.savedAmount += amount;
+        this.currentAmount += amount;
     }
 }
