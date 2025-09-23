@@ -48,30 +48,12 @@
 
 
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import "../App.css";
 import UserDropdown from "../pages/UserDropdown.jsx";
 
-export default function Navbar() {
-  const [user, setUser] = useState(null);
-
-  // Load user on mount
-  useEffect(() => {
-    const userJson = localStorage.getItem("user");
-    if (userJson) setUser(JSON.parse(userJson));
-  }, []);
-
-  // Sync user if localStorage changes (multiple tabs)
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const userJson = localStorage.getItem("user");
-      setUser(userJson ? JSON.parse(userJson) : null);
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
+export default function Navbar({ user, setUser }) {
   return (
     <nav className="navbar">
       <div className="nav-left">
@@ -95,3 +77,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
