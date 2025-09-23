@@ -18,7 +18,7 @@ services:
       context: ./Backend/budgetplanner
       dockerfile: ../../BUDGET-FULLSTACK/backend.Dockerfile
     ports:
-      - "2025:2000"
+      - "2005:2005"
     depends_on:
       - budget-mysqldb
     restart: on-failure
