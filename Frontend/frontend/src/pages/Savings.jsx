@@ -1,164 +1,173 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./Savings.css";
 
 export default function Savings() {
   const [savingsList, setSavingsList] = useState([]);
   const [goalName, setGoalName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
-  const [editId, setEditId] = useState(null); // for update
-  const [incomeTotal, setIncomeTotal] = useState(0); // total income from DB
+  const [savedAmount, setSavedAmount] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const API_URL = `${import.meta.env.VITE_API_URL}/api/savings`;
-  const INCOME_URL = `${import.meta.env.VITE_API_URL}/api/incomes`;
+  const BASE = import.meta.env.VITE_API_URL || "http://localhost:2005";
+  const API = `${BASE}/api/savings`;
 
-  // Fetch total income
-  const fetchIncome = async () => {
-    try {
-      const res = await axios.get(INCOME_URL);
-      const totalIncome = res.data.reduce((acc, item) => acc + item.amount, 0);
-      setIncomeTotal(totalIncome);
-    } catch (err) {
-      console.error("Error fetching income:", err);
-    }
-  };
-
-  // Fetch savings from backend
-  const fetchSavings = async () => {
-    try {
-      const res = await axios.get(API_URL);
-      const updatedSavings = res.data.map((s) => ({
-        ...s,
-        currentAmount: s.currentAmount !== undefined ? s.currentAmount : incomeTotal,
-      }));
-      setSavingsList(updatedSavings);
-    } catch (err) {
-      console.error("Error fetching savings:", err);
-    }
-  };
+  // inline axios
+  const axiosClient = axios.create({
+    baseURL: BASE,
+    headers: { "Content-Type": "application/json" },
+  });
+  axiosClient.interceptors.request.use((cfg) => {
+    const token = localStorage.getItem("token");
+    if (token) cfg.headers.Authorization = `Bearer ${token}`;
+    return cfg;
+  });
 
   useEffect(() => {
-    fetchIncome();
+    loadSavings();
+    // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    if (incomeTotal > 0) fetchSavings();
-  }, [incomeTotal]);
+  async function loadSavings() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axiosClient.get("/api/savings"); // relative to baseURL
+      console.debug("loadSavings response:", res.status, res.data);
+      setSavingsList(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Failed to fetch savings:", err);
+      const msg = err?.response?.data ?? err?.response?.statusText ?? err?.message;
+      setError("Load error: " + (typeof msg === "object" ? JSON.stringify(msg) : msg));
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // Add or update savings goal
-  const handleAddOrUpdate = async () => {
-    if (!goalName || !targetAmount) return;
+  function resetForm() {
+    setGoalName("");
+    setTargetAmount("");
+    setSavedAmount("");
+    setEditId(null);
+    setError(null);
+  }
+
+  async function handleAddOrUpdate() {
+    if (!goalName || !targetAmount) {
+      setError("Please provide a goal name and target amount.");
+      return;
+    }
+    setError(null);
 
     const payload = {
-      goalName,
+      goalName: goalName.trim(),
       targetAmount: parseFloat(targetAmount),
-      currentAmount: incomeTotal,
+      savedAmount: parseFloat(savedAmount) || 0,
     };
 
     try {
       if (editId) {
-        // Update existing
-        const saving = savingsList.find((s) => s.id === editId);
-        await axios.put(`${API_URL}/${editId}`, {
-          ...saving,
-          goalName: goalName,
-          targetAmount: parseFloat(targetAmount),
-        });
+        const res = await axiosClient.put(`/api/savings/${editId}`, payload);
+        console.debug("update response:", res.status, res.data);
+        setSavingsList((prev) => prev.map((s) => (s.id === editId ? res.data : s)));
         setEditId(null);
       } else {
-        // Add new
-        await axios.post(API_URL, payload);
+        const res = await axiosClient.post("/api/savings", payload);
+        console.debug("create response:", res.status, res.data);
+        setSavingsList((prev) => [...prev, res.data]);
       }
-      setGoalName("");
-      setTargetAmount("");
-      fetchSavings();
+      resetForm();
     } catch (err) {
-      console.error("Error saving goal:", err);
+      console.error("Add/Update failed:", err);
+      // show the actual server response if any
+      const serverMsg = err?.response?.data ?? err?.response?.statusText ?? err?.message;
+      setError("Add/Update error: " + (typeof serverMsg === "object" ? JSON.stringify(serverMsg) : serverMsg));
     }
-  };
+  }
 
-  // Prepare goal for editing
-  const handleEdit = (saving) => {
-    setGoalName(saving.goalName);
-    setTargetAmount(saving.targetAmount);
-    setEditId(saving.id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Increment currentAmount
-  const incrementCurrentAmount = async (id, extraAmount) => {
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this savings goal?")) return;
     try {
-      const saving = savingsList.find((s) => s.id === id);
-      const updated = { ...saving, currentAmount: saving.currentAmount + extraAmount };
-      await axios.put(`${API_URL}/${id}`, updated);
-      fetchSavings();
+      const res = await axiosClient.delete(`/api/savings/${id}`);
+      console.debug("delete response:", res.status);
+      setSavingsList((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
-      console.error("Error updating current amount:", err);
+      console.error("Delete failed:", err);
+      const serverMsg = err?.response?.data ?? err?.response?.statusText ?? err?.message;
+      setError("Delete error: " + (typeof serverMsg === "object" ? JSON.stringify(serverMsg) : serverMsg));
     }
-  };
+  }
 
-  // Delete savings goal
-  const deleteSavings = async (id) => {
+  async function addToSaved(id, amountToAdd) {
+    if (isNaN(amountToAdd) || amountToAdd <= 0) return;
     try {
-      await axios.delete(`${API_URL}/${id}`);
-      fetchSavings();
+      const target = savingsList.find((s) => s.id === id);
+      if (!target) return;
+      const newSaved = (target.savedAmount || 0) + parseFloat(amountToAdd);
+      const payload = {
+        goalName: target.goalName,
+        targetAmount: target.targetAmount,
+        savedAmount: newSaved,
+      };
+      const res = await axiosClient.put(`/api/savings/${id}`, payload);
+      console.debug("addToSaved response:", res.status, res.data);
+      setSavingsList((prev) => prev.map((s) => (s.id === id ? res.data : s)));
     } catch (err) {
-      console.error("Error deleting savings:", err);
+      console.error("Add to saved failed:", err);
+      const serverMsg = err?.response?.data ?? err?.response?.statusText ?? err?.message;
+      setError("Add-money error: " + (typeof serverMsg === "object" ? JSON.stringify(serverMsg) : serverMsg));
     }
-  };
+  }
+
+  const totalTarget = savingsList.reduce((sum, s) => sum + (s.targetAmount || 0), 0);
+  const totalSaved = savingsList.reduce((sum, s) => sum + (s.savedAmount || 0), 0);
 
   return (
-    <div className="savings-container">
-      <h2>💸 Savings Goals</h2>
+    <div style={{ maxWidth: 980, margin: "24px auto", padding: 12 }}>
+      <h1>Savings Goals</h1>
+      {error && <div style={{ color: "#b00020", marginBottom: 12 }}>{error}</div>}
 
-      {/* Input Form */}
-      <div className="savings-form">
-        <input
-          type="text"
-          placeholder="Goal Name"
-          value={goalName}
-          onChange={(e) => setGoalName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Target Amount (₹)"
-          value={targetAmount}
-          onChange={(e) => setTargetAmount(e.target.value)}
-        />
-        <button onClick={handleAddOrUpdate}>
-          {editId ? "Update Goal" : "+ Add Goal"}
-        </button>
+      <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8, background: "#fafafa", marginBottom: 16 }}>
+        <h2>{editId ? "Edit Goal" : "Add New Goal"}</h2>
+        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <input value={goalName} onChange={(e) => setGoalName(e.target.value)} placeholder="Goal name" />
+          <input value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder="Target amount" type="number" />
+          <input value={savedAmount} onChange={(e) => setSavedAmount(e.target.value)} placeholder="Saved amount" type="number" />
+        </div>
+        <div>
+          <button onClick={handleAddOrUpdate}>{editId ? "Update Goal" : "Add Goal"}</button>
+          {editId && <button onClick={resetForm} style={{ marginLeft: 8 }}>Cancel</button>}
+        </div>
       </div>
 
-      {/* Savings Table */}
-      <table className="savings-table">
-        <thead>
-          <tr>
-            <th>Goal</th>
-            <th>Target (₹)</th>
-            <th>Current (₹)</th>
-            <th>Progress</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {savingsList.map((s) => (
-            <tr key={s.id}>
-              <td>{s.goalName}</td>
-              <td>₹ {s.targetAmount}</td>
-              <td>₹ {s.currentAmount}</td>
-              <td>
-                <progress value={s.currentAmount} max={s.targetAmount}></progress>
-              </td>
-              <td>
-                <button onClick={() => incrementCurrentAmount(s.id, 1000)}>+ ₹1000</button>
-                <button onClick={() => handleEdit(s)}>✏️ Edit</button>
-                <button onClick={() => deleteSavings(s.id)} className="delete-btn">❌ Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ marginBottom: 8 }}>
+        <strong>Total target:</strong> ₹ {totalTarget.toFixed(2)} &nbsp; <strong>Total saved:</strong> ₹ {totalSaved.toFixed(2)}
+      </div>
+
+      <div>
+        {loading ? <div>Loading...</div> : savingsList.length === 0 ? <div>No goals yet.</div> :
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr><th>Goal</th><th>Target</th><th>Saved</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {savingsList.map((s) => (
+                <tr key={s.id}>
+                  <td>{s.goalName}</td>
+                  <td>₹ {Number(s.targetAmount || 0).toFixed(2)}</td>
+                  <td>₹ {Number(s.savedAmount || 0).toFixed(2)}</td>
+                  <td>
+                    <button onClick={() => { setGoalName(s.goalName); setTargetAmount(String(s.targetAmount)); setSavedAmount(String(s.savedAmount)); setEditId(s.id); }}>Edit</button>
+                    <button onClick={() => handleDelete(s.id)} style={{ marginLeft: 8 }}>Delete</button>
+                    <button onClick={() => { const val = prompt("Add amount:"); const n = parseFloat(val); if (!isNaN(n) && n>0) addToSaved(s.id, n); }} style={{ marginLeft: 8 }}>+ Add</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        }
+      </div>
     </div>
   );
 }

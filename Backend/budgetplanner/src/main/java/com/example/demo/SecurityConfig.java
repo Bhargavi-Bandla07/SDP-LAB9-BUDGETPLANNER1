@@ -1,4 +1,3 @@
-// SecurityConfig.java
 package com.example.demo;
 
 import org.springframework.context.annotation.Bean;
@@ -15,9 +14,12 @@ public class SecurityConfig {
                 .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests()
+                // allow unauthenticated access to auth + CRUD endpoints for development
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/incomes/**", "/api/expenses/**", "/api/alerts/**").permitAll()
+                .requestMatchers("/api/savings/**", "/api/incomes/**", "/api/expenses/**", "/api/alerts/**").permitAll()
+                // keep other endpoints authenticated if present
                 .anyRequest().authenticated();
+
         return http.build();
     }
 }
