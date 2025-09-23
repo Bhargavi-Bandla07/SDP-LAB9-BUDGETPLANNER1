@@ -100,9 +100,17 @@
 
 
 
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+/**
+ * UpdateProfile.jsx
+ * - Uses VITE_API_URL (set before build)
+ * - Attaches Authorization header using token stored in localStorage
+ * - Updates localStorage user and calls setUser after successful update
+ */
 
 export default function UpdateProfile({ setUser }) {
   const navigate = useNavigate();
@@ -114,45 +122,76 @@ export default function UpdateProfile({ setUser }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Helper to get API base and token
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:2005";
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    if (!user) {
+    if (!user || !token) {
+      // if no user or token, redirect to sign in
       navigate("/signin");
       return;
     }
 
+    // fetch profile with Authorization header
+    setLoading(true);
     axios
-      .get(`http://localhost:2005/api/users/${user.id}`)
+      .get(`${API_BASE}/api/users/${user.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         setName(res.data.name || "");
         setEmail(res.data.email || "");
-        setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
-        alert("Error fetching profile");
+        console.error("Error fetching profile:", err.response || err.message);
+        // If unauthorized, clear storage and redirect to signin
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+          navigate("/signin");
+          return;
+        }
+        alert("Error fetching profile. Please sign in again.");
         navigate("/signin");
-      });
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, navigate]);
 
   const handleUpdate = (e) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !token) {
+      navigate("/signin");
+      return;
+    }
 
     const payload = { name, email };
     if (password.trim() !== "") payload.password = password;
 
     axios
-      .put(`http://localhost:2005/api/users/${user.id}`, payload)
-      .then(() => {
+      .put(`${API_BASE}/api/users/${user.id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
         alert("Profile updated successfully!");
-        const updatedUser = { ...user, name, email };
+        // Update local user object (do not include password)
+        const updatedUser = { ...user, name: res.data.name || name, email: res.data.email || email };
         localStorage.setItem("user", JSON.stringify(updatedUser));
-        setUser(updatedUser); // updates Navbar instantly
+        setUser(updatedUser); // update parent/navbar
         navigate("/"); // redirect to home
       })
       .catch((err) => {
-        console.error(err);
-        alert("Error updating profile");
+        console.error("Error updating profile:", err.response || err.message);
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+          navigate("/signin");
+          return;
+        }
+        alert("Error updating profile. See console for details.");
       });
   };
 
