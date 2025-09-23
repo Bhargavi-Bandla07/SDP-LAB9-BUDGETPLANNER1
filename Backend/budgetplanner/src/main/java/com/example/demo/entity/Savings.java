@@ -14,7 +14,8 @@ public class Savings {
     private double targetAmount;
     private double savedAmount;
 
-    public Savings() {}
+    public Savings() {
+    }
 
     public Savings(String goalName, double targetAmount, double savedAmount) {
         this.goalName = goalName;

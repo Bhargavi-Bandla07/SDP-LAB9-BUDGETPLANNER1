@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/incomes")
-@CrossOrigin(origins = "http://localhost:5173") // React frontend URL
+@CrossOrigin(origins = "*") // React frontend URL
 public class IncomeController {
 
     private final IncomeRepository incomeRepository;
