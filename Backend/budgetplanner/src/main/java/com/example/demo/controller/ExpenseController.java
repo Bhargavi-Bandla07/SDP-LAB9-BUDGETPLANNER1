@@ -20,12 +20,6 @@ public class ExpenseController {
 
     // READ: GET http://localhost:8080/api/expenses
 
-    @GetMapping("/")
-    public String home() {
-        System.out.println("Hello from ExpenseController!"); // prints in console
-        return "Welcome to Expenses API!"; // response in browser
-    }
-
     @GetMapping
     public List<Expense> getAllExpenses() {
         return expenseService.getAllExpenses();
