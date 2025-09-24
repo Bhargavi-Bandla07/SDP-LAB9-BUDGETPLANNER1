@@ -1,4 +1,3 @@
-version: "3.8"
 
 services:
   budget-mysqldb:
@@ -35,3 +34,48 @@ services:
 
 volumes:
   mysql-data:
+
+
+
+
+# services:
+#   mysqldb:
+#     image: mysql:8
+#     container_name: mysql-db
+#     environment:
+#       MYSQL_ROOT_PASSWORD: docker
+#       MYSQL_DATABASE: klustudentdb
+#     ports:
+#       - "3307:3306"
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+#     networks:
+#       - springboot-mysql-net
+
+#   backend:
+#     image: bhargavi079/docker-budgetbackend:latest
+#     container_name: springboot
+#     ports:
+#       - "2005:2005"
+#     depends_on:
+#       - mysqldb
+#     restart: on-failure
+#     networks:
+#       - springboot-mysql-net
+
+#   frontend:
+#     image: bhargavi079/docker-budgetfrontend:latest
+#     container_name: react
+#     ports:
+#       - "3000:80"
+#     depends_on:
+#       - backend
+#     restart: on-failure
+#     networks:
+#       - springboot-mysql-net
+
+# volumes:
+#   mysql_data:
+
+# networks:
+#   springboot-mysql-net:

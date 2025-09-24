@@ -6,10 +6,8 @@ WORKDIR /app
 COPY mvnw .          
 COPY .mvn/ .mvn
 COPY pom.xml ./
-COPY src ./src
 
-# Give execute permission for mvnw
-RUN chmod +x mvnw
+COPY src ./src
 
 RUN ./mvnw clean package -DskipTests
 
